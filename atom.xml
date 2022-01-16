@@ -3,14 +3,14 @@
   <title>LFde个人博客</title>
   
   
-  <link href="http://example.com/atom.xml" rel="self"/>
+  <link href="https://hash-roar.github.io/atom.xml" rel="self"/>
   
-  <link href="http://example.com/"/>
+  <link href="https://hash-roar.github.io/"/>
   <updated>2022-01-16T04:13:46.746Z</updated>
-  <id>http://example.com/</id>
+  <id>https://hash-roar.github.io/</id>
   
   <author>
-    <name>LF</name>
+    <name>fokingwind</name>
     
   </author>
   
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://example.com/2022/01/16/hello-world/"/>
-    <id>http://example.com/2022/01/16/hello-world/</id>
+    <link href="https://hash-roar.github.io/2022/01/16/hello-world/"/>
+    <id>https://hash-roar.github.io/2022/01/16/hello-world/</id>
     <published>2022-01-16T04:13:46.746Z</published>
     <updated>2022-01-16T04:13:46.746Z</updated>
     
