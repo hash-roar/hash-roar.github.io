@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="intro本篇博客的主要内容是梳理高等代数中一个重要问题:矩阵的分解,或者说在(有限维)线性空间的线性变换的分解.其中包含一些希尔伯特空间中的自伴随算子或正规算子的推广 本文几乎没有证明,所论述的一切结论都尽量从直观出发. background现在回头看,我们发现可以从至少两种角度看待一个矩阵,将其看作一个具有常规范数($L^2$)的赋范线性空间的元素,同时也是一个有限维赋范线性空间上的线性算子.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Matrix Decomposition">
+<meta property="og:url" content="https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/index.html">
+<meta property="og:site_name" content="qiyuncun">
+<meta property="og:description" content="intro本篇博客的主要内容是梳理高等代数中一个重要问题:矩阵的分解,或者说在(有限维)线性空间的线性变换的分解.其中包含一些希尔伯特空间中的自伴随算子或正规算子的推广 本文几乎没有证明,所论述的一切结论都尽量从直观出发. background现在回头看,我们发现可以从至少两种角度看待一个矩阵,将其看作一个具有常规范数($L^2$)的赋范线性空间的元素,同时也是一个有限维赋范线性空间上的线性算子.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-16T09:25:55.000Z">
+<meta property="article:modified_time" content="2023-04-09T12:31:43.646Z">
+<meta property="article:author" content="zlf">
+<meta property="article:tag" content="math">
+<meta property="article:tag" content="linear algebra">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/project/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/project/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/project/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Matrix Decomposition</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/project/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/project/">Home</a></li><!--
+     --><!--
+       --><li><a href="/project/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/project/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/project/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/project/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/project/2022/12/13/reading-cpu-memory/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/project/2022/04/13/intro/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&text=Matrix Decomposition"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&is_video=false&description=Matrix Decomposition"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Matrix Decomposition&body=Check out this article: https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&name=Matrix Decomposition&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&t=Matrix Decomposition"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#intro"><span class="toc-number">1.</span> <span class="toc-text">intro</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#background"><span class="toc-number">2.</span> <span class="toc-text">background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SVD-%E5%88%86%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">SVD 分解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E5%80%BC%E5%88%86%E8%A7%A3"><span class="toc-number">4.</span> <span class="toc-text">特征值分解</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Matrix Decomposition
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">zlf</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-16T09:25:55.000Z" itemprop="datePublished">2022-08-16</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/project/categories/math/">math</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/project/tags/linear-algebra/" rel="tag">linear algebra</a>, <a class="tag-link-link" href="/project/tags/math/" rel="tag">math</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="intro"><a href="#intro" class="headerlink" title="intro"></a>intro</h2><p>本篇博客的主要内容是梳理高等代数中一个重要问题:矩阵的分解,或者说在(有限维)线性空间的线性变换的分解.其中包含一些希尔伯特空间中的自伴随算子或正规算子的推广</p>
+<p>本文几乎没有证明,所论述的一切结论都尽量从直观出发.</p>
+<h2 id="background"><a href="#background" class="headerlink" title="background"></a>background</h2><p>现在回头看,我们发现可以从至少两种角度看待一个矩阵,将其看作一个具有常规范数($L^2$)的赋范线性空间的元素,同时也是一个有限维赋范线性空间上的线性算子.当然从第一个角度看我们可以通过分析的方式定义连续性,甚至矩阵的级数以及矩阵变量的复合函数.从第二个角度看我们可以将矩阵分解看成将线性变化线性空间上几个简单的线性变换的叠加.</p>
+<p>可以说线性变换的诸多良好性质本质上都来源于它的各种分解.或者说,一个最复杂的线性变换实际上都是由简单线性变化叠加而成的.而且这些分解有些有着很好的直观解释.</p>
+<p>数学符号或定理要么在定义描述的工具,要么在描述一个过程.面对某一论题我们有许多问题可以问: 它的存在性,唯一性,如果是变换,它的稳定性等.这是机械的,但是也能让我们最快抓住问题的核心逻辑.在本文中我也将以这样的方式写作.</p>
+<p>未特别说明情况下本文都在复数域下论述</p>
+<p>关于矩阵分解: 我们特别关注它的几个核心问题,什么样的矩阵可以分解,分解的形式揭示了什么意义,分解的矩阵是怎么得到的,是唯一的还是可变的,如果是后者,这意味着我们拥有一个自由度 可以选取分解出的矩阵使其拥有简单有效的性质.</p>
+<h2 id="SVD-分解"><a href="#SVD-分解" class="headerlink" title="SVD 分解"></a>SVD 分解</h2><p>奇异值分解(singular value decomposition)是最基本的,几乎也是最本质的分解.让我们这样想, 矩阵表示的是线性变换:<br>$$<br>T: x\rightarrow Ax<br>$$<br>假设A为一个$m*n$ 矩阵,也就是说T将n维线性空间的元素映射到m维线性空间.这样的线性变换已经包含了所有的有限维线性空间上的线性变换(因为有限维线性空间同构于$R^n$空间,而后者的线性变换都能由矩阵表示).</p>
+<p>而对于这样具有普适性的表示,我们有一个重要的结果:</p>
+<p>任意m*n矩阵A都有分解: $A&#x3D;U\Sigma V^{\ast}$ 其中U是m*m酉矩阵,V是n*n酉矩阵.$\Sigma$ 是m*n对角矩阵,且对角元素大于等于0. 这个分解还可以写为<br>$$<br>A &#x3D; \sum_{i&#x3D;1}^{r}\sigma_i U_iV_i^{\ast}<br>$$<br>其中$\sigma_i$表示奇异值,r为矩阵的秩.</p>
+<p>我们知道对角矩阵可以看作对坐标系的伸缩变换酉矩阵(正交矩阵)可以看作坐标系的旋转(翻转).从第一种表示我们可以立刻看到其中的几何意义:  一个n维空间到m维空间的线性变换可以分解为 n维空间的旋转 -&gt; m到n维的坐标系伸缩 -&gt; m维空间的旋转. 这样光从矩阵分解我们就窥见了线性变换的内在意义.</p>
+<p>question: A将一个线性空间的球体变换为什么?</p>
+<p>又注意到酉矩阵是由正交的单位向量组成的,因此为满秩.既酉矩阵向量可以作为空间单位正交基.又有线性空间任一元素可有基的线性和表示,从第二种表示我们看到:<br>$$<br> T(V_i) &#x3D; \sigma_i U_i<br>$$<br>这就是分解的威力,线性变换T将n维空间正交基底$V_i$ 映射为m维空间的向量$\sigma_i U_i$ .通过这两个观察我们可以得到许多关于线性映射的结论.</p>
+<p>如果我们计算:<br>$$<br>A^{\ast}A &#x3D; V\Sigma^{\ast}U^{\ast}U\Sigma V^{\ast} &#x3D; V(\Sigma^{\ast}\Sigma)V^{\ast}<br>$$<br>而我们知半正定矩阵都能对角化,观察上式可以得到分解矩阵的性质:</p>
+<p>奇异值系数矩阵的系数$\Sigma_{ii} &#x3D; \sqrt{A^{\ast}A的特征值}$</p>
+<p>V的列向量是是$A^{\ast}A$的特征向量</p>
+<p>U的列向量是$AA^{\ast}$的特征向量</p>
+<p>下面来总结svd分解:</p>
+<p>什么样的矩阵可以进行奇异值分解? 所有的</p>
+<p>矩阵分解的唯一性? 奇异值系数矩阵在不考虑顺序下是唯一确定的且其值就等于$A^{*}A的特征值平方根$</p>
+<p>分解矩阵性质: UV为满秩的酉矩阵,且列向量分别为对应矩阵与矩阵转置积的特征向量</p>
+<h2 id="特征值分解"><a href="#特征值分解" class="headerlink" title="特征值分解"></a>特征值分解</h2><p>另一个十分重要的分解是特征值分解既将矩阵A分解为下面的形式:<br>$$<br>A &#x3D; Q\Sigma Q^{-1}<br>$$<br>将上式改写: $AQ &#x3D; Q\Sigma$ .可以观察得到成立 $AQ_i &#x3D; \Sigma_{ii}Q_i$ .Q的每一个列向量即为A的特征向量.如果我们能得到这样的分解那是最好的的了.因为特征值分解具有良好的性质: 它表明了一个矩阵与一个对角矩阵相似,而矩阵相似是一个等价关系,因此利用一个对角矩阵可以得到一个矩阵的集合,这个集合的意义是: 对于集合中任意两个矩阵,都是同一个线性变换选定不同的基所对应的矩阵.如果要获得更多的泛化性质,可以把它放在一个环中考虑.从上面所论述的来看,矩阵分解表明Q所对应的是一个旋转(翻折),在矩阵相似的意义下是相对无关紧要的.而决定一个线性变换的核心(秩,kernel,image,determinant)都是由特征值系数矩阵决定的.</p>
+<p>关于特征值分解存在性 的一个重要命题是: <strong>矩阵能特征分解当且仅当矩阵有n个不同的特征向量</strong>.实际上判断一个矩阵能不能分解使用上面的定理验证一般来说是很麻烦的,我们需要一种新的理论来接近我们的结果: 获得矩阵的特征分解.</p>
+<p>这个理论就是不变子空间.直观来说,不变子空间所描述的是线性变换在线性子空间的作用局限性,既不会将子空间的元素映射到子空间之外.这个性质也就意味着我们只需要只有其中几行几列元素不为0的矩阵就能完全描述这种变换</p>
+<p>什么样的矩阵可以特征值分解? 首先要方形矩阵,同时又要有n个特征向量.一个实用的简单下界是: 所有正规矩阵($AA^{\ast} &#x3D; A^{\ast}A$)可以被分解.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/project/">Home</a></li>
+         
+          <li><a href="/project/about/">About</a></li>
+         
+          <li><a href="/project/tags/">Tag</a></li>
+         
+          <li><a href="/project/categories/">Category</a></li>
+         
+          <li><a href="/project/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#intro"><span class="toc-number">1.</span> <span class="toc-text">intro</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#background"><span class="toc-number">2.</span> <span class="toc-text">background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SVD-%E5%88%86%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">SVD 分解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E5%80%BC%E5%88%86%E8%A7%A3"><span class="toc-number">4.</span> <span class="toc-text">特征值分解</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&text=Matrix Decomposition"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&is_video=false&description=Matrix Decomposition"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Matrix Decomposition&body=Check out this article: https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&title=Matrix Decomposition"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&name=Matrix Decomposition&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://hash-roar.github.io/project/2022/08/16/matrix-decomposition/&t=Matrix Decomposition"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2023
+    zlf
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/project/">Home</a></li><!--
+     --><!--
+       --><li><a href="/project/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/project/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/project/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/project/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/project/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;这篇文章主要介绍了计算机主存的结构,最重要的是主存与cpu交互部分cpu cache的原理以及带来的程序编写上的启发.包含了以下内容: 计算机内存(RAM,DRAM等)的物理结构.Cpu Cache,Virtual Memory,利用cache特性的代码优化.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="reading-cpu-memory">
+<meta property="og:url" content="https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/index.html">
+<meta property="og:site_name" content="qiyuncun">
+<meta property="og:description" content="reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;这篇文章主要介绍了计算机主存的结构,最重要的是主存与cpu交互部分cpu cache的原理以及带来的程序编写上的启发.包含了以下内容: 计算机内存(RAM,DRAM等)的物理结构.Cpu Cache,Virtual Memory,利用cache特性的代码优化.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408145527948.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408150015602.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408152657683.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408153105830.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408154127202.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408161946163.png">
+<meta property="og:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408165843733.png">
+<meta property="article:published_time" content="2022-12-13T13:49:44.000Z">
+<meta property="article:modified_time" content="2023-04-09T12:38:25.264Z">
+<meta property="article:author" content="zlf">
+<meta property="article:tag" content="computer science">
+<meta property="article:tag" content="hardware">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hash-roar.github.io/project/image/reading-cpu-memory/image-20230408145527948.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/project/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/project/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/project/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>reading-cpu-memory</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/project/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/project/">Home</a></li><!--
+     --><!--
+       --><li><a href="/project/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/project/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/project/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/project/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/project/2023/03/28/jiangcheng/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/project/2022/08/16/matrix-decomposition/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&text=reading-cpu-memory"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&is_video=false&description=reading-cpu-memory"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=reading-cpu-memory&body=Check out this article: https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&name=reading-cpu-memory&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&t=reading-cpu-memory"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#reading-lt-lt-What-Every-Programmer-Should-Know-About-Memory-gt-gt"><span class="toc-number">1.</span> <span class="toc-text">reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Cpu-Cache"><span class="toc-number">1.1.</span> <span class="toc-text">Cpu Cache</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81cache"><span class="toc-number">1.1.1.</span> <span class="toc-text">为什么需要cache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E5%9C%A8cpu%E7%9A%84%E5%88%86%E5%B8%83%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.1.2.</span> <span class="toc-text">cache在cpu的分布是什么?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="toc-number">1.1.3.</span> <span class="toc-text">cache长什么样?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E9%80%9F%E5%BA%A6"><span class="toc-number">1.1.4.</span> <span class="toc-text">cache速度?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cpu%E6%80%8E%E4%B9%88%E9%80%9A%E8%BF%87cache%E4%B8%8E%E5%86%85%E5%AD%98%E4%BA%A4%E4%BA%92"><span class="toc-number">1.1.5.</span> <span class="toc-text">cpu怎么通过cache与内存交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E5%B9%85%E7%AC%A6%E5%90%88%E7%9B%B4%E8%A7%82%E7%9A%84%E5%9B%BE"><span class="toc-number">1.1.6.</span> <span class="toc-text">一幅符合直观的图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E7%9A%84%E5%A4%9A%E6%A0%B8%E5%90%8C%E6%AD%A5"><span class="toc-number">1.1.7.</span> <span class="toc-text">cache的多核同步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#virtual-memory"><span class="toc-number">1.2.</span> <span class="toc-text">virtual memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Tlb"><span class="toc-number">1.2.1.</span> <span class="toc-text">Tlb</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#program-optimal"><span class="toc-number">1.3.</span> <span class="toc-text">program optimal</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cache-%E6%B1%A1%E6%9F%93"><span class="toc-number">1.3.1.</span> <span class="toc-text">cache 污染</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E8%AE%BF%E9%97%AE"><span class="toc-number">1.3.2.</span> <span class="toc-text">cache访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">结构体定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9level1-instruction-%E4%BB%A3%E7%A0%81%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">1.3.4.</span> <span class="toc-text">对level1 instruction 代码的优化</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        reading-cpu-memory
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">zlf</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-12-13T13:49:44.000Z" itemprop="datePublished">2022-12-13</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/project/categories/computer-science/">computer science</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/project/tags/computer-science/" rel="tag">computer science</a>, <a class="tag-link-link" href="/project/tags/hardware/" rel="tag">hardware</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="reading-lt-lt-What-Every-Programmer-Should-Know-About-Memory-gt-gt"><a href="#reading-lt-lt-What-Every-Programmer-Should-Know-About-Memory-gt-gt" class="headerlink" title="reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;"></a>reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;</h1><p>这篇文章主要介绍了计算机主存的结构,最重要的是主存与cpu交互部分cpu cache的原理以及带来的程序编写上的启发.包含了以下内容: 计算机内存(RAM,DRAM等)的物理结构.Cpu Cache,Virtual Memory,利用cache特性的代码优化.</p>
+<p>​	&lt;<What Every Programmer Should Know About Memory>&gt;写于2007年有一百多页,其中一些具体的数据已经过时了,但是其中的大体结构和主要思想经过长久的历史考验,现在看来仍然十分启人深思.我挑选了我最感兴趣的几个部分阅读,并将引起我注意的一些内容记录.</p>
+<h2 id="Cpu-Cache"><a href="#Cpu-Cache" class="headerlink" title="Cpu Cache"></a>Cpu Cache</h2><h3 id="为什么需要cache"><a href="#为什么需要cache" class="headerlink" title="为什么需要cache"></a>为什么需要cache</h3><p>随着半导体行业发展,cpu计算速度大大提升,但主存RAM的访问速度一直没有革命性的提升,这就导致了越来越多的程序被主存访问速度拖累,一个巨大的问题亟需解决.</p>
+<p>一个关键的观察是: 大多数程序都有空间局部性,既程序用到的数据经常局限在一小块内,因此我们只要能使得访问这一小块内存的速度够快就行了.这就引出了主人公—cache</p>
+<p><img src="/project/image/reading-cpu-memory/image-20230408145527948.png" alt="image-20230408145527948"></p>
+<h3 id="cache在cpu的分布是什么"><a href="#cache在cpu的分布是什么" class="headerlink" title="cache在cpu的分布是什么?"></a>cache在cpu的分布是什么?</h3><p><img src="/project/image/reading-cpu-memory/image-20230408150015602.png" alt="image-20230408150015602"></p>
+<p>在这个图中，我们有两个处理器，每个处理器有两个核心，每个核心有两个线程。线程共享第1级缓存。核心（在深灰色阴影中）有单独的1级缓存。<strong>也就是说一个核内的线程共享L1 cache,而不同的核心共享L2,L3 cache</strong>.当然不同的cpu有自己的cache</p>
+<h3 id="cache长什么样"><a href="#cache长什么样" class="headerlink" title="cache长什么样?"></a>cache长什么样?</h3><p>cache由许多cache line组成,一个cache line就是cache基本组成单位,表示一组数据,大小是64Byte或其它.</p>
+<h3 id="cache速度"><a href="#cache速度" class="headerlink" title="cache速度?"></a>cache速度?</h3><p><img src="/project/image/reading-cpu-memory/image-20230408152657683.png" alt="image-20230408152657683"></p>
+<p>这是2007年的数据,我另外找了一个2020年i9-9900K的数据:</p>
+<p><img src="/project/image/reading-cpu-memory/image-20230408153105830.png" alt="image-20230408153105830"></p>
+<p>可见数量级上基本没有变化.</p>
+<p><em>注: L2 的延迟很大一部分来自多核共享时的线路延迟(wire delay)</em></p>
+<p>文章中给出了解释:</p>
+<blockquote>
+<p>This is a physical limitation which can only get worse with increasing cache sizes. Only process shrinking (for instance, going from 60nm for Merom to 45nm for Penryn in Intel’s lineup) can improve those numbers.</p>
+</blockquote>
+<h3 id="cpu怎么通过cache与内存交互"><a href="#cpu怎么通过cache与内存交互" class="headerlink" title="cpu怎么通过cache与内存交互"></a>cpu怎么通过cache与内存交互</h3><p>当处理器需要访问memory时，整个cache line被加载到L1d中。</p>
+<p>这其中涉及到一些细节值得思考:</p>
+<ul>
+<li>L1cache已满的话要怎么逐出cache line来空出位置给新的cache line?很容易想到递归逐出: 将L1 逐出的放到L2,如果L2满就逐出L2的,如此递归.这种逐出有一种缺点:耗时.文章中给出了一种不同的策略:</li>
+</ul>
+<blockquote>
+<p>Intel implements inclusive caches19 where each cache line in L1d is also present in L2. Therefore evicting from L1d is<br>much faster. </p>
+</blockquote>
+<p>考虑到L2 cache比L1大得多且更便宜,是一种合理的牺牲空间换时间tradeoff.</p>
+<ul>
+<li>write策略.Write through或者write back.? 答案是: 采取和linux page cache一样的策略:write back.cpu写入cache并标记dirty就完成,由cache负责写回主存.</li>
+</ul>
+<h3 id="一幅符合直观的图"><a href="#一幅符合直观的图" class="headerlink" title="一幅符合直观的图"></a>一幅符合直观的图</h3><p><img src="/project/image/reading-cpu-memory/image-20230408154127202.png" alt="image-20230408154127202"></p>
+<p>这幅图表示一个简单的程序以一个随机的方式访问一个块内存的所用时间.通过这幅图我们可以直接看出有几层cache,每个cache的大概大小.</p>
+<h3 id="cache的多核同步"><a href="#cache的多核同步" class="headerlink" title="cache的多核同步"></a>cache的多核同步</h3><p>cache在一个核心上工作得很好,但涉及到多核的共享和同步,许多问题就出现了.最基本的问题:如果coreA 在内存M出写入,此时新写入的数据还在coreA的cache中没有同步到主存.此时coreB从主存中读M地址处的数据,这样就出现了缓存不一致的情况.解决cache一致性的核心策略是<strong>MESI 协议</strong>.既cache的四个状态:</p>
+<p><strong>Modified</strong>: cache被修改,同时这份cache在整个处理器只有一份</p>
+<p><strong>Exclusive</strong>: cache没有被修改,同时这份cache在整个处理器只有一份</p>
+<p><strong>Shared</strong>: cache 没有被修改,同时这份cache在整个处理器有多份</p>
+<p><strong>Invalid</strong>: cache 无效</p>
+<p>下面是状态的迁移图</p>
+<p><img src="/project/image/reading-cpu-memory/image-20230408161946163.png" alt="image-20230408161946163"></p>
+<p>,有了这几个状态,或许我们在脑海中已经大概推演出这个协议的主要含义.但是其正确性(是否覆盖了所有的场景)还需要仔细证明.以及还有一些微妙的场景需要说明:</p>
+<ul>
+<li>本地cache在modified 状态下,其他核心想要读取cache: 本地核心需要将cache发送给目标并且将状态改为shared,也就是<strong>此时更新的内容写入主存</strong>.如果其它核心想要写cache,本地核心只需将本地cache标记为invalid即可,更新的内容不必关心,因为会被覆盖.</li>
+<li>本地cache为shared时,写操作需要将其他的核心cache状态改为invalid,也就是必须通过“Request For Owner-ship” (RFO) 消息通知出去.</li>
+</ul>
+<p><em>注:为什么需要exclusive状态,从上文可以看出,去掉这个状态也没有影响,写操作从shared直接到modified即可.原因是:如果一步到位,则每次从shared到modified都要发送RFO消息给外界.而exclusive状态可以直接转换为modified状态而不用发送消息进行同步.</em></p>
+<h2 id="virtual-memory"><a href="#virtual-memory" class="headerlink" title="virtual memory"></a>virtual memory</h2><p>虚拟地址系统是操作系统重要组成部分,此处只列出一些文中提到的值得注意的事情:</p>
+<ul>
+<li>页面目录的数据结构存储在内存中。操作系统必须分配连续的物理内存，并将该内存区域的基址存储在一个特殊的寄存器中。</li>
+<li>多级页表结构,一图胜千言</li>
+</ul>
+<p><img src="/project/image/reading-cpu-memory/image-20230408165843733.png" alt="image-20230408165843733"></p>
+<ul>
+<li>实际上内存的地址空间内的代码段分布是随机的:</li>
+</ul>
+<blockquote>
+<p> For security reasons the various parts of an executable (code,data, heap, stack, Dynamic Shared Objects (DSOs), aka shared libraries) are mapped at randomized addresses.<br> The randomization extends to the relative position of the<br> various parts; that implies that the various memory re-<br> gions in use in a process are widespread throughout the<br> virtual address space.</p>
+</blockquote>
+<h3 id="Tlb"><a href="#Tlb" class="headerlink" title="Tlb"></a>Tlb</h3><p>如果没有特殊优化可想而知每次访问内存都要走一次”page walk”,那将带来巨大的延迟.因此类似于主存与cache,page table entry的高速缓存出现了.它通常是一个小缓存，因为它必须非常快。现代CPU提供多级TLB缓存，就像主存cache一样；更高级别的缓存更大也更慢。</p>
+<p>TLB是一个core内共享的全局资源。在处理器core上执行的所有线程和进程都使用相同的TLB。</p>
+<p>因为不同的进程有不同的页表,因此进程切换时需要刷新tlb,刷新策略有以下两种:</p>
+<blockquote>
+<ul>
+<li><p>The TLB is flushed whenever the page table tree is</p>
+<p>changed.</p>
+</li>
+<li><p>The tags for the TLB entries are extended to ad-</p>
+<p>ditionally and uniquely identify the page table tree</p>
+<p>they refer to.</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="program-optimal"><a href="#program-optimal" class="headerlink" title="program optimal"></a>program optimal</h2><p>文章在这一节里主要讲了一些利用cache特性优化代码的方法.在我看来这些内容属于trick而不是theory.但是其中的很多还是很具有启发性的,它告诉我们写程序时的一些思考角度.</p>
+<h3 id="cache-污染"><a href="#cache-污染" class="headerlink" title="cache 污染"></a>cache 污染</h3><p>在一些场景比如遍历一个超大的矩阵(此处指dense matrix,parse matrix有其他的表示方法),如果直接遍历,那么cpu会按照常规将matrix的内容都加载到cache中.也就意味着之前的热点数据被逐出,cache里留下的全是以后再也不会用到的垃圾数据.还有一个场景,如c语言的memset,如果直接赋值,那么cache中会充满同样的垃圾数据,真正的热点数据被逐出了</p>
+<p>文章中提到了一种办法来解决:</p>
+<blockquote>
+<p>processors provide support for non-temporal write operations. Non-temporal in this context means the data will not be reused soon, so there is no reason to cache it. These non-temporal write operations do not read a cache line and then modify it; instead, the new content is directly written to memory.</p>
+</blockquote>
+<h3 id="cache访问"><a href="#cache访问" class="headerlink" title="cache访问"></a>cache访问</h3><p><strong>核心思想是: 尽量使程序访问顺序和cache加载的顺序相同,也就是充分利用每一个cache line.</strong></p>
+<p>这对于我们编写代码有许多启示,例如:存储一个矩阵,我们应该怎么做?</p>
+<p>我们可以写成:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Matrix</span>&#123;</span><br><span class="line">  vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是上面类中所有数据都在堆中且不是连续的,因此很多访问都要从主存加载数据,而且vector内部还包含了一个指针,因此访问一次寻址了三次.</p>
+<p>或者:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">struct Matrix&#123;</span><br><span class="line">		vector&lt;int&gt; data_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是还是有很多次寻址.</p>
+<p>或者把确定大小的放在栈上,实在没办法的放在堆上:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="type">int</span> Size&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Matrix</span>&#123;</span><br><span class="line">	<span class="type">int</span> data[Size];</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 模板特化</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Matrix</span>&lt;<span class="number">-1</span>&gt;&#123;</span><br><span class="line">		vector&lt;<span class="type">int</span>&gt; data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>又比如一个矩阵乘积,简单的实现是</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; N; ++i)</span><br><span class="line"><span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; N; ++j)</span><br><span class="line"><span class="keyword">for</span> (k = <span class="number">0</span>; k &lt; N; ++k)</span><br><span class="line">res[i][j] += mul1[i][k] * mul2[k][j];</span><br></pre></td></tr></table></figure>
+
+<p>但是仔细观察可以得到,虽然第一个矩阵的是沿着cache加载方向的,第二个矩阵却是跨越cache line的.</p>
+<p>我们知道矩阵的乘积公式有一种变形:<br>$$<br>(AB){ij} &#x3D; \sum_{k&#x3D;0}^{N-1}a_ikb_{jk}^T<br>$$<br>因此可以先对矩阵进行转置再进行相乘</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> tmp[N][N];</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; N; ++i)</span><br><span class="line"><span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; N; ++j)</span><br><span class="line">tmp[i][j] = mul2[j][i];</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; N; ++i)</span><br><span class="line"><span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; N; ++j)</span><br><span class="line"><span class="keyword">for</span> (k = <span class="number">0</span>; k &lt; N; ++k)</span><br><span class="line">res[i][j] += mul1[i][k] * tmp[j][k];</span><br></pre></td></tr></table></figure>
+
+<p>但是这还是优缺点,使用了一个临时矩阵,如果矩阵很大,这是不能接受的,因此我们可以另辟蹊径,沿着”<strong>充分利用每一个cache line</strong>“的思想,以cache line为单元组操作:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> SM (CLS / sizeof (double))</span></span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; N; i += SM)</span><br><span class="line"><span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; N; j += SM)</span><br><span class="line"><span class="keyword">for</span> (k = <span class="number">0</span>; k &lt; N; k += SM)</span><br><span class="line"><span class="keyword">for</span> (i2 = <span class="number">0</span>, rres = &amp;res[i][j],rmul1 = &amp;mul1[i][k]; i2 &lt; SM;++i2, rres += N, rmul1 += N)</span><br><span class="line"><span class="keyword">for</span> (k2 = <span class="number">0</span>, rmul2 = &amp;mul2[k][j];</span><br><span class="line">k2 &lt; SM; ++k2, rmul2 += N)</span><br><span class="line"><span class="keyword">for</span> (j2 = <span class="number">0</span>; j2 &lt; SM; ++j2)</span><br><span class="line">rres[j2] += rmul1[k2] * rmul2[j2];</span><br></pre></td></tr></table></figure>
+
+<p>文章中测试了所有的这些优化的威力:</p>
+<blockquote>
+<p> If these intrinsics are used the program runs another 7.3% (relative to the original) faster. The result is a program which runs in 10% of the time of the original code. Translated into numbers which people recognize, we went from 318 MFLOPS to 3.35 GFLOPS. Since we are only interested in memory effects here, the program code is pushed out into section A.1.</p>
+</blockquote>
+<h3 id="结构体定义"><a href="#结构体定义" class="headerlink" title="结构体定义"></a>结构体定义</h3><p>核心思想是:</p>
+<ol>
+<li>在合理情况下想办法使得结构体不要跨越cache line,可以通过字段重排,字段分解等办法,</li>
+<li>同时使得结构体字段尽量按照它被访问的顺序摆放.</li>
+<li>尽量不要使得字节对齐失效,一些架构支持非字节对齐的内存访问,但是可能需要两次访存,因此速度更慢.另外的架构根本不支持上诉行为.</li>
+</ol>
+<p>一个有趣的地方是, 原来函数栈也会做字节对齐来配合内存访问的字节对齐:</p>
+<blockquote>
+<p>The size of a stack frame used in a function is not necessarily a multiple of the alignment. This means padding is needed if other functions are called from this stack frame. The big difference is that the stack frame size is, in most cases, known to the compiler and, therefore, it knows how to adjust the stack pointer to ensure alignment for any function which is called from that stack frame. In fact, most compilers will simply round the stack frame size up and be done with it.</p>
+</blockquote>
+<h3 id="对level1-instruction-代码的优化"><a href="#对level1-instruction-代码的优化" class="headerlink" title="对level1 instruction 代码的优化"></a>对level1 instruction 代码的优化</h3><p>我们知道L1 cache分为instruction cache和data cache.前者的变更少也更容易预判.</p>
+<p>优化的核心思想是:</p>
+<ol>
+<li>慎重使用 inline关键字,虽然函数inline能减少函数调用栈的消耗,但是过多的内联函数会导致instruction set膨胀,从而使得instruction cache效果变差.</li>
+<li>利用cpu的分支预测,一次错误的分支预测会浪费大量的instruction cache.必要时可以使用gcc 的__builtin_expect 帮助编译器生成代码(编译器根据代码块的可能性尽量生成能线性执行的代码)</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/project/">Home</a></li>
+         
+          <li><a href="/project/about/">About</a></li>
+         
+          <li><a href="/project/tags/">Tag</a></li>
+         
+          <li><a href="/project/categories/">Category</a></li>
+         
+          <li><a href="/project/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#reading-lt-lt-What-Every-Programmer-Should-Know-About-Memory-gt-gt"><span class="toc-number">1.</span> <span class="toc-text">reading&lt;&lt;What Every Programmer Should Know About Memory&gt;&gt;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Cpu-Cache"><span class="toc-number">1.1.</span> <span class="toc-text">Cpu Cache</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81cache"><span class="toc-number">1.1.1.</span> <span class="toc-text">为什么需要cache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E5%9C%A8cpu%E7%9A%84%E5%88%86%E5%B8%83%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.1.2.</span> <span class="toc-text">cache在cpu的分布是什么?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="toc-number">1.1.3.</span> <span class="toc-text">cache长什么样?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E9%80%9F%E5%BA%A6"><span class="toc-number">1.1.4.</span> <span class="toc-text">cache速度?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cpu%E6%80%8E%E4%B9%88%E9%80%9A%E8%BF%87cache%E4%B8%8E%E5%86%85%E5%AD%98%E4%BA%A4%E4%BA%92"><span class="toc-number">1.1.5.</span> <span class="toc-text">cpu怎么通过cache与内存交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E5%B9%85%E7%AC%A6%E5%90%88%E7%9B%B4%E8%A7%82%E7%9A%84%E5%9B%BE"><span class="toc-number">1.1.6.</span> <span class="toc-text">一幅符合直观的图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E7%9A%84%E5%A4%9A%E6%A0%B8%E5%90%8C%E6%AD%A5"><span class="toc-number">1.1.7.</span> <span class="toc-text">cache的多核同步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#virtual-memory"><span class="toc-number">1.2.</span> <span class="toc-text">virtual memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Tlb"><span class="toc-number">1.2.1.</span> <span class="toc-text">Tlb</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#program-optimal"><span class="toc-number">1.3.</span> <span class="toc-text">program optimal</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cache-%E6%B1%A1%E6%9F%93"><span class="toc-number">1.3.1.</span> <span class="toc-text">cache 污染</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache%E8%AE%BF%E9%97%AE"><span class="toc-number">1.3.2.</span> <span class="toc-text">cache访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">结构体定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9level1-instruction-%E4%BB%A3%E7%A0%81%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">1.3.4.</span> <span class="toc-text">对level1 instruction 代码的优化</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&text=reading-cpu-memory"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&is_video=false&description=reading-cpu-memory"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=reading-cpu-memory&body=Check out this article: https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&title=reading-cpu-memory"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&name=reading-cpu-memory&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://hash-roar.github.io/project/2022/12/13/reading-cpu-memory/&t=reading-cpu-memory"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2023
+    zlf
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/project/">Home</a></li><!--
+     --><!--
+       --><li><a href="/project/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/project/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/project/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/project/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/hash-roar">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/project/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
